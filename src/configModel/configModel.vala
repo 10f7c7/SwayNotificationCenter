@@ -38,6 +38,20 @@ namespace SwayNotificationCenter {
                     return "overlay";
             }
         }
+
+        public GtkLayerShell.Layer to_layer () {
+            switch (this) {
+                case BACKGROUND:
+                    return GtkLayerShell.Layer.BACKGROUND;
+                case BOTTOM:
+                    return GtkLayerShell.Layer.BOTTOM;
+                case TOP:
+                    return GtkLayerShell.Layer.TOP;
+                default:
+                case OVERLAY:
+                    return GtkLayerShell.Layer.OVERLAY;
+            }
+        }
     }
 
     public enum CssPriority {
@@ -75,8 +89,7 @@ namespace SwayNotificationCenter {
         public string ? category { get; set; default = null; }
 
         private const RegexCompileFlags REGEX_COMPILE_OPTIONS =
-            RegexCompileFlags.MULTILINE
-            | RegexCompileFlags.JAVASCRIPT_COMPAT;
+            RegexCompileFlags.MULTILINE;
 
         private const RegexMatchFlags REGEX_MATCH_FLAGS = RegexMatchFlags.NOTEMPTY;
 
@@ -248,6 +261,9 @@ namespace SwayNotificationCenter {
             spawn_env += "SWAYNC_TIME=%s".printf (param.time.to_string ());
             spawn_env += "SWAYNC_DESKTOP_ENTRY=%s".printf (param.desktop_entry ?? "");
             foreach (string hint in param.hints.get_keys ()) {
+                if (hint.contains ("image") || hint.contains ("icon")) {
+                    continue;
+                }
                 spawn_env += "SWAYNC_HINT_%s=%s".printf (
                     hint.up ().replace ("-", "_"),
                     param.hints[hint].print (false));
